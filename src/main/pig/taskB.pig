@@ -11,5 +11,4 @@ usersValues = FOREACH users GENERATE ID, Name, Nationality;
 joined = JOIN top_10_pages BY group, usersValues BY ID;
 product = FOREACH joined GENERATE $2, $3, $4;
 
-
 STORE product INTO './output' USING PigStorage(',');
