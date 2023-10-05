@@ -1,4 +1,5 @@
 associates = LOAD '/Project1/Testing/associatesTest.csv' USING PigStorage(',') AS (FriendRel: int, PersonA_ID: int, PersonB_ID: int, DateofFriendship: int, Descr: chararray);
+faceInPage = LOAD '/Project1/Testing/faceInPageTest.csv' USING PigStorage(',') AS (id: int, name: chararray, nationality: chararray, countryCod: int, hobby: chararray);
 
 -- Map PersonA_ID and PersonB_ID and the other way around
 clean1 = FOREACH associates GENERATE PersonA_ID, PersonB_ID;
@@ -18,7 +19,11 @@ test = JOIN count BY group, count1 BY group;
 -- Get Final
 testing = FOREACH test GENERATE $0, ($1 + $3);
 
+testing1 = JOIN testing BY $0, faceInPage BY id;
 
-dump testing;
+final = FOREACH testing1 GENERATE $3, $1;
+
+
+dump final;
 --dump a;
---STORE testing INTO '/Project2/Pig/TaskB/Test/taskB.csv' USING PigStorage(',');
+STORE final INTO '/Project2/Pig/TaskB/Test/taskD.csv' USING PigStorage(',');
