@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 
-n = 5000
+n = 10
 maxInt = 10000
 
 
@@ -19,7 +19,7 @@ def dataset_creation():
     dataset["y"] = [random.randint(0, maxInt) for i in range(n)]
 
     print(dataset)
-    dataset.to_csv("dataset.csv", index=False, header=None)
+    dataset.to_csv("datasetTest.csv", index=False, header=None)
 
 x_list = []
 y_list = []
@@ -33,7 +33,7 @@ def kmeans(k):
     kmeans_dataset["x"] = x_list
     kmeans_dataset["y"] = y_list
     print(kmeans_dataset)
-    kmeans_dataset.to_csv("kmeans.csv", index=False, header=None)
+    kmeans_dataset.to_csv("kmeansTest.csv", index=False, header=None)
 
 dups = []
 def check_dups(x, y):
@@ -51,5 +51,5 @@ if __name__ == '__main__':
 
     print("Main Function")
     dataset_creation()
-    kmeans(5)
+    kmeans(2)
 
