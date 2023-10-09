@@ -178,7 +178,6 @@ public class optimization {
 
     private static void simple(String input, String tempOutput, String output, int threshold) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
 
-        long start = System.currentTimeMillis();
         end = true;
         Configuration conf = new Configuration();
         Job job1 = Job.getInstance(conf, "Test");
@@ -198,9 +197,7 @@ public class optimization {
         FileInputFormat.addInputPath(job1, new Path(input));
         FileOutputFormat.setOutputPath(job1, new Path(output));
         job1.waitForCompletion(true);
-        long end = System.currentTimeMillis();
-        long timeTaken = end - start;
-        System.out.println("Time Taken: " + timeTaken);
+
     }
     //        job2.getConfiguration().set("join.type", "inner");
     private static void looping(int r, String startInput, String tempOutput, String output, int threshold) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
@@ -224,14 +221,20 @@ public class optimization {
 
     public static void main(String[] args) throws Exception {
 
-        //String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
-        String input = "/Users/mikaelamilch/Library/CloudStorage/OneDrive-WorcesterPolytechnicInstitute(wpi.edu)/2023-2024/CS 585/CS585-Assignment2/src/main/python/datasetTest.csv";
-//        String output = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/output";
-        String output = "/Users/mikaelamilch/Desktop/output";
+        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
+//        String input = "/Users/mikaelamilch/Library/CloudStorage/OneDrive-WorcesterPolytechnicInstitute(wpi.edu)/2023-2024/CS 585/CS585-Assignment2/src/main/python/datasetTest.csv";
+//        String output = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/output/optimization";
+//        String output = "/Users/mikaelamilch/Desktop/output";
 
-        String temp = "/Users/mikaelamilch/Desktop/kmeans.csv";
+        String output = "file:///C:/Users/nickl/OneDrive/Desktop/output/optimization";
 
-        looping(100, input, temp, output, 100);
+        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeans.csv";
 
+        long start = System.currentTimeMillis();
+        looping(100, input, temp, output, 500);
+
+        long end = System.currentTimeMillis();
+        long timeTaken = end - start;
+        System.out.println("Time Taken: " + timeTaken);
     }
 }
