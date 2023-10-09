@@ -147,7 +147,6 @@ public class advancedMulti {
 
     private static void simple(String input, String tempOutput, String output, int threshold) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
 
-        long start = System.currentTimeMillis();
         end = true;
         Configuration conf = new Configuration();
         Job job1 = Job.getInstance(conf, "Test");
@@ -166,9 +165,7 @@ public class advancedMulti {
         FileInputFormat.addInputPath(job1, new Path(input));
         FileOutputFormat.setOutputPath(job1, new Path(output));
         job1.waitForCompletion(true);
-        long end = System.currentTimeMillis();
-        long timeTaken = end - start;
-        System.out.println("Time Taken: " + timeTaken);
+
     }
 //        job2.getConfiguration().set("join.type", "inner");
     private static void looping(int r, String startInput, String tempOutput, String output, int threshold) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
@@ -198,7 +195,12 @@ public class advancedMulti {
 
         String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeans.csv";
 
+        long start = System.currentTimeMillis();
+
         looping(100, input, temp, output, 500);
 
+        long end = System.currentTimeMillis();
+        long timeTaken = end - start;
+        System.out.println("Time Taken: " + timeTaken);
     }
 }
