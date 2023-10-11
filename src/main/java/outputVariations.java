@@ -73,11 +73,19 @@ public class outputVariations {
             String point = value.toString();
 //            System.out.println("Map: " + point);
 
+            int x;
+            int y;
             // Split by Column
             String[] split = point.split(",");
 
-            int x = Integer.parseInt((split[0]));
-            int y = Integer.parseInt((split[1]));
+            if (split.length > 2) {
+                x = Integer.parseInt((split[3]));
+                y = Integer.parseInt((split[4]));
+
+            } else {
+                x = Integer.parseInt((split[0]));
+                y = Integer.parseInt((split[1]));
+            }
 
             for (int i = 0; i < centroidsList.size(); i++){
 

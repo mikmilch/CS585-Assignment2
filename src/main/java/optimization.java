@@ -81,8 +81,17 @@ public class optimization {
 
                 String[] currentSplit = current.split(",");
 
-                int currentx = Integer.parseInt(currentSplit[0]);
-                int currenty = Integer.parseInt(currentSplit[1]);
+                int currentx;
+                int currenty;
+
+                if (split.length > 2) {
+                    currentx = Integer.parseInt((currentSplit[3]));
+                    currenty = Integer.parseInt((currentSplit[4]));
+
+                } else {
+                    currentx = Integer.parseInt((currentSplit[0]));
+                    currenty = Integer.parseInt((currentSplit[1]));
+                }
 
                 //Euclidean distance formula
                 double distance = Math.sqrt((Math.pow((currentx - x), 2)) + (Math.pow((currenty - y), 2)));
@@ -162,8 +171,17 @@ public class optimization {
 
                 String[] split = current.split(",");
 
-                int currentx = Integer.parseInt(split[0]);
-                int currenty = Integer.parseInt(split[1]);
+                int currentx;
+                int currenty;
+
+                if (split.length > 2) {
+                    currentx = Integer.parseInt((split[3]));
+                    currenty = Integer.parseInt((split[4]));
+
+                } else {
+                    currentx = Integer.parseInt((split[0]));
+                    currenty = Integer.parseInt((split[1]));
+                }
 
                 xSum += currentx;
                 ySum += currenty;
@@ -200,7 +218,7 @@ public class optimization {
 
     }
     //        job2.getConfiguration().set("join.type", "inner");
-    private static void looping(int r, String startInput, String tempOutput, String output, int threshold) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
+    public static void looping(int r, String startInput, String tempOutput, String output, int threshold) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
         String currentTemp = tempOutput;
         String Output = output;

@@ -69,11 +69,19 @@ public class basicMultiIteration {
             // Data point x and y values
             String point = value.toString();
 
+            int x;
+            int y;
             // Split by Column
             String[] split = point.split(",");
 
-            int x = Integer.parseInt((split[0]));
-            int y = Integer.parseInt((split[1]));
+            if (split.length > 2) {
+                x = Integer.parseInt((split[3]));
+                y = Integer.parseInt((split[4]));
+
+            } else {
+                x = Integer.parseInt((split[0]));
+                y = Integer.parseInt((split[1]));
+            }
 
             for (int i = 0; i < centroidsList.size(); i++){
 
@@ -119,8 +127,17 @@ public class basicMultiIteration {
 
                 String[] split = current.split(",");
 
-                int currentx = Integer.parseInt(split[0]);
-                int currenty = Integer.parseInt(split[1]);
+                int currentx;
+                int currenty;
+
+                if (split.length > 2) {
+                    currentx = Integer.parseInt((split[3]));
+                    currenty = Integer.parseInt((split[4]));
+
+                } else {
+                    currentx = Integer.parseInt((split[0]));
+                    currenty = Integer.parseInt((split[1]));
+                }
 
                 newCentroidX += currentx;
                 newCentroidY += currenty;
