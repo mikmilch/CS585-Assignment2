@@ -48,10 +48,7 @@ public class advancedMulti {
 
             while (StringUtils.isNotEmpty(line = br.readLine())) {
                 try {
-                    centroidsList.add(line);
-//                    String[] split = line.split("/t");
-//                    accessLogMap.put(split[0], split[1]);
-                }
+                    centroidsList.add(line);                }
                 catch (Exception e){
                     System.out.println(e);
                 }

@@ -162,7 +162,7 @@ public class basicMultiIteration {
 
     }
 
-    private static void looping(int r, String startInput, String tempOutput, String output) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
+    public static void looping(int r, String startInput, String tempOutput, String output) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
         String currentTemp = tempOutput;
         String Output = output;

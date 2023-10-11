@@ -47,6 +47,8 @@ public class kmeans {
 //    map-reduce jobs to also control whether it should start another iteration.
 
 
+    public kmeans() {
+    }
 
     public static class Map extends Mapper<LongWritable, Text, Text, Text> {
 
@@ -93,15 +95,24 @@ public class kmeans {
             // Data point x and y values
             String point = value.toString();
 
+            int x;
+            int y;
             // Split by Column
             String[] split = point.split(",");
 
-            int x = Integer.parseInt((split[0]));
-            int y = Integer.parseInt((split[1]));
+            if (split.length > 2) {
+                x = Integer.parseInt((split[3]));
+                y = Integer.parseInt((split[4]));
+
+            } else {
+                x = Integer.parseInt((split[0]));
+                y = Integer.parseInt((split[1]));
+            }
 
             for (int i = 0; i < centroidsList.size(); i++){
 
                 String current = centroidsList.get(i);
+
 
                 String[] currentSplit = current.split(",");
 
@@ -135,16 +146,27 @@ public class kmeans {
             int newCentroidY = 0;
             int count = 0;
 
-            System.out.println(values);
 
             // For each relationship of a user
             for (Text value : values) {
                 String current = value.toString();
+                System.out.println(current);
 
                 String[] split = current.split(",");
 
-                int currentx = Integer.parseInt(split[0]);
-                int currenty = Integer.parseInt(split[1]);
+                int currentx;
+                int currenty;
+
+                if (split.length > 2) {
+                    currentx = Integer.parseInt((split[3]));
+                    currenty = Integer.parseInt((split[4]));
+
+                } else {
+                    currentx = Integer.parseInt((split[0]));
+                    currenty = Integer.parseInt((split[1]));
+                }
+
+
 
                 newCentroidX += currentx;
                 newCentroidY += currenty;
@@ -161,7 +183,7 @@ public class kmeans {
         }
     }
 
-    private static void simple(String input, String output) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
+    public static void simple(String input, String temp, String output) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
 
 
         long start = System.currentTimeMillis();
@@ -175,7 +197,7 @@ public class kmeans {
         job1.setOutputKeyClass(Text.class);
         job1.setOutputValueClass(Text.class);
 
-        job1.addCacheFile(new URI("file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeansTest.csv"));
+        job1.addCacheFile(new URI(temp));
 
         FileInputFormat.addInputPath(job1, new Path(input));
         FileOutputFormat.setOutputPath(job1, new Path(output));
@@ -193,7 +215,8 @@ public class kmeans {
 
         String output = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/output";
 
-        simple(input, output);
+        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeansTest.csv";
+        simple(input, temp, output);
 
     }
 }

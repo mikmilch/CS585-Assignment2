@@ -1,7 +1,8 @@
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public class BYOD {
+public class clustering {
+
 
     public static void single(String input, String temp, String output) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
@@ -12,11 +13,12 @@ public class BYOD {
 
     }
     public static void main(String[] args) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
-        String input = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/Mall_Customers.csv";
-        String output = "C:/Users/nickl/OneDrive/Desktop/output/BYOD/single";
 
-        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/BYOD_kmeans_dataset.csv";
+        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/datasetTest.csv";
 
+        String output = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/single";
+
+        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeansTest.csv";
         single(input, temp, output);
     }
 }
