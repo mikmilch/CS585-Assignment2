@@ -128,21 +128,23 @@ public class outputVariations {
 
             String points = "";
 
-//            System.out.println("Reduce: " + key);
+
 
             // For each relationship of a user
             for (Text value : values) {
                 String current = value.toString();
 
                 String[] split = current.split(",");
-
                 int partialSumX = Integer.parseInt(split[0]);
                 int partialSumY = Integer.parseInt(split[1]);
                 int partialCount = Integer.parseInt(split[2]);
-                String[] currentPoints = split[3].split(";");
 
-                for (int i = 0; i < currentPoints.length; i++){
-                    points += "(" + currentPoints[i].split(":")[0] + ", " + currentPoints[i].split(":")[1] + ");";
+                if (split.length > 3) {
+                    String[] currentPoints = split[3].split(";");
+
+                    for (int i = 0; i < currentPoints.length; i++) {
+                        points += "(" + currentPoints[i].split(":")[0] + ", " + currentPoints[i].split(":")[1] + ");";
+                    }
                 }
 
 
@@ -194,8 +196,6 @@ public class outputVariations {
 
         private Text result = new Text();
 
-
-
         @Override
         protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             int xSum = 0;
@@ -210,10 +210,19 @@ public class outputVariations {
 
                 String current = value.toString();
 
+                int currentx;
+                int currenty;
+
                 String[] split = current.split(",");
 
-                int currentx = Integer.parseInt(split[0]);
-                int currenty = Integer.parseInt(split[1]);
+                if (split.length > 2) {
+                    currentx = Integer.parseInt((split[3]));
+                    currenty = Integer.parseInt((split[4]));
+
+                } else {
+                    currentx = Integer.parseInt((split[0]));
+                    currenty = Integer.parseInt((split[1]));
+                }
 
                 String currentPoint = currentx + ":" + currenty + ";";
                 points += currentPoint;
@@ -224,6 +233,7 @@ public class outputVariations {
             }
 
             if (context.getConfiguration().get("variation").equals("Only Cluster Points")) {
+
                 // Emit the partial sum and count
                 result.set(xSum+","+ySum+","+count);
                 context.write(key, result);
@@ -262,7 +272,7 @@ public class outputVariations {
 
     }
     //        job2.getConfiguration().set("join.type", "inner");
-    private static void looping(int r, String startInput, String tempOutput, String output, int threshold, String variation) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
+    public static void looping(int r, String startInput, String tempOutput, String output, int threshold, String variation) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
         String currentTemp = tempOutput;
         String Output = output;

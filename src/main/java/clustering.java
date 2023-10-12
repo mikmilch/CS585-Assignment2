@@ -24,6 +24,12 @@ public class clustering {
         optimization.looping(iterations, input, temp, output, threshold);
 
     }
+
+    public static void outputVariation(int iterations, String input, String temp, String output, int threshold, String variation) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
+
+        outputVariations.looping(iterations, input, temp, output, threshold, variation);
+
+    }
     public static void main(String[] args) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
         String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
@@ -33,6 +39,8 @@ public class clustering {
         String basicOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/basic";
         String advancedOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/advanced";
         String optimizationOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/optimization";
+        String variationOutput1 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/variation/1";
+        String variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/variation/2";
 
 
         single(input, temp, singleOutput);
@@ -42,5 +50,11 @@ public class clustering {
         advanced(100, input, temp, advancedOutput, 500);
 
         optimization(100, input, temp, optimizationOutput, 500);
+
+        String variation1 = "Only Cluster Points";
+        String variation2 = "Final Clustered Points";
+
+        outputVariation(100, input, temp, variationOutput1, 500, variation1);
+        outputVariation(100, input, temp, variationOutput2, 500, variation2);
     }
 }
