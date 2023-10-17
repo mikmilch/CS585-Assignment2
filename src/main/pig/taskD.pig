@@ -1,5 +1,5 @@
 associates = LOAD '/Project1/Testing/associatesTest.csv' USING PigStorage(',') AS (FriendRel: int, PersonA_ID: int, PersonB_ID: int, DateofFriendship: int, Descr: chararray);
-faceInPage = LOAD '/Project1/Testing/faceInPageTest.csv' USING PigStorage(',') AS (id: int, name: chararray, nationality: chararray, countryCod: int, hobby: chararray);
+faceInPage = LOAD '/Project1/Testing/faceInPageTest.csv' USING PigStorage(',') AS (ID: int, Name: chararray, Nationality: chararray, CountryCode: int, Hobby: chararray);
 
 -- Map PersonA_ID and PersonB_ID and the other way around
 clean1 = FOREACH associates GENERATE PersonA_ID, PersonB_ID;
@@ -19,7 +19,7 @@ joined = JOIN count BY group, count1 BY group;
 -- Get Final
 countRelations = FOREACH joined GENERATE $0, ($1 + $3);
 
-joined2 = JOIN countRelations BY $0, faceInPage BY id;
+joined2 = JOIN countRelations BY $0, faceInPage BY ID;
 
 final = FOREACH joined2 GENERATE $3, $1;
 

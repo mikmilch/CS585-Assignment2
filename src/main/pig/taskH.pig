@@ -28,6 +28,7 @@ average = FOREACH joinedRelation GENERATE group, group1.$0, AVG(group1.$2);
 --Filter By those more popular than the avaerage
 popular = Filter countRelations BY $1 > average.$2;
 
+--Final
 final = FOREACH popular GENERATE $0;
 
 dump final;

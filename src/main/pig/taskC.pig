@@ -1,10 +1,10 @@
-test = LOAD '/Project1/Testing/faceInPageTest.csv' USING PigStorage(',') AS (id: int, name: chararray, nationality: chararray, countryCod: int, hobby: chararray);
+test = LOAD '/Project1/Testing/faceInPageTest.csv' USING PigStorage(',') AS (ID: int, Name: chararray, Nationality: chararray, CountryCode: int, Hobby: chararray);
 
-clean = FOREACH test GENERATE nationality;
-clean1 = GROUP clean BY nationality;
+clean = FOREACH test GENERATE Nationality;
+clean1 = GROUP clean BY Nationality;
 
 --clean2 = FOREACH clean1 GENERATE group, COUNT(clean1);
-testing = FOREACH clean1 GENERATE group, COUNT(clean.nationality);
+testing = FOREACH clean1 GENERATE group, COUNT(clean.Nationality);
 
 dump testing;
 
