@@ -1,51 +1,28 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.*;
+package kmedoids;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.*;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
-public class kmeans {
-
-
-//    Step 2 (Clustering the Data):
-//    Develop the K-means clustering strategies described below using java map-reduce
-//    jobs. You should document the differences between your solutions, i.e., what changes
-//    were made to the mapper, at the reducer, number of mappers/reducers, or in the
-//    main control program. These algorithms should include:
-//    a) A single-iteration K-means algorithm (R=1) [5 pts]
-//    b) A (basic) multi-iteration K-means algorithm (remember to set the parameter R
-//            to terminate the process, e.g., R=10). [5 pts]
-//    c) An additional (advanced) multi-iteration K-means algorithm that terminates
-//    potentially earlier if it converges based on some threshold. [5 pts]
-//    d) An additional (advanced) algorithm that also uses Hadoop Map Reduce
-//    optimizations as discussed in class (e.g., a combiner). [5 pts]
-//    e) For your K-means solution in subproblem (d) above, design two output
-//    variations:
-//    i. return only cluster centers along with an indication if convergence has
-//    been reached; [5 pts]
-//    ii. return the final clustered data points along with their cluster centers. [5
-//    pts]
-//    f) Provide a description for each of your above five solutions in your report and
-//    conduct experiments over them, for example by choosing different K values
-//    and different R values. describe the relative performance, explain, and analyze
-//    your findings. [10 pts]
-//    Note: Since the algorithm is iterative, you need your main program that generates the
-//    map-reduce jobs to also control whether it should start another iteration.
-
+public class basicMulti {
 
     public static class Map extends Mapper<LongWritable, Text, Text, Text> {
 
@@ -143,37 +120,44 @@ public class kmeans {
             int newCentroidY = 0;
             int count = 0;
 
+            int minDistance = Integer.MAX_VALUE;
 
-            // For each relationship of a user
             for (Text value : values) {
+                int sumDistance = 0;
+
                 String current = value.toString();
                 System.out.println(current);
 
                 String[] split = current.split(",");
 
-                int currentx;
-                int currenty;
+                int currentx = Integer.parseInt(split[0]);
+                int currenty = Integer.parseInt(split[1]);
 
-                if (split.length > 2) {
-                    currentx = Integer.parseInt((split[3]));
-                    currenty = Integer.parseInt((split[4]));
+                for (Text other : values){
+                    String otherPoint = other.toString();
+                    System.out.println(current);
 
-                } else {
-                    currentx = Integer.parseInt((split[0]));
-                    currenty = Integer.parseInt((split[1]));
+                    String[] otherSplit = otherPoint.split(",");
+
+                    int otherx = Integer.parseInt(otherSplit[0]);
+                    int othery = Integer.parseInt(otherSplit[1]);
+
+                    //Euclidean distance formula
+                    double distance = Math.sqrt((Math.pow((currentx - otherx), 2)) + (Math.pow((currenty - othery), 2)));
+
+                    sumDistance += (int) distance;
+                    if (sumDistance > minDistance){
+                        break;
+                    }
                 }
 
+                if (sumDistance < minDistance){
+                    minDistance = sumDistance;
+                    newCentroidX = currentx;
+                    newCentroidY = currenty;
+                }
 
-
-                newCentroidX += currentx;
-                newCentroidY += currenty;
-                count++;
             }
-
-            newCentroidX = (int) newCentroidX / count;
-            newCentroidY = (int) newCentroidY / count;
-
-//            System.out.println(newCentroidX);
             newCentroid.set(String.valueOf(newCentroidX) + "," + String.valueOf(newCentroidY)); // Key = averageX , averageY
 
             context.write(newCentroid, null); // Write <key, value> = <User, Count of Relationships>
@@ -187,7 +171,7 @@ public class kmeans {
         Configuration conf = new Configuration();
         Job job1 = Job.getInstance(conf, "Test");
 
-        job1.setJarByClass(kmeans.class);
+        job1.setJarByClass(basicMulti.class);
         job1.setMapperClass(Map.class);
         job1.setReducerClass(Reduce.class);
 
@@ -205,15 +189,16 @@ public class kmeans {
 
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void looping(int r, String startInput, String tempOutput, String output) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
-//        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
-        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/datasetTest.csv";
+        String currentTemp = tempOutput;
+        String Output = output;
 
-        String output = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/output";
+        for (int i = 0 ; i < r; i++){
+            String currentOutput = Output + "/" + i;
 
-        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeansTest.csv";
-        simple(input, temp, output);
-
+            simple(startInput, currentTemp, currentOutput);
+            currentTemp = currentOutput + "/part-r-00000";
+        }
     }
 }
