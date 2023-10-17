@@ -1,5 +1,4 @@
 associates = LOAD '/Project1/Testing/associatesTest.csv' USING PigStorage(',') AS (FriendRel: int, PersonA_ID: int, PersonB_ID: int, DateofFriendship: int, Descr: chararray);
-faceInPage = LOAD '/Project1/Testing/faceInPageTest.csv' USING PigStorage(',') AS (id: int, name: chararray, nationality: chararray, countryCod: int, hobby: chararray);
 
 -- Map PersonA_ID and PersonB_ID and the other way around
 clean1 = FOREACH associates GENERATE PersonA_ID, PersonB_ID;
@@ -16,14 +15,19 @@ count1 = FOREACH clean4 GENERATE group, COUNT(clean2.PersonB_ID);
 -- Join
 joined = JOIN count BY group, count1 BY group;
 
--- Get Final
+-- Count of all Relations of a user
 countRelations = FOREACH joined GENERATE $0, ($1 + $3);
 
-joined2 = JOIN countRelations BY $0, faceInPage BY id;
+-- Group all together in order to get the average relationships of all users
+group1 = FOREACH countRelations GENERATE 1, $0, $1;
+joinedRelation = GROUP group1 BY $0;
 
-final = FOREACH joined2 GENERATE $3, $1;
+-- Averagr
+average = FOREACH joinedRelation GENERATE group, group1.$0, AVG(group1.$2);
 
+--Filter By those more popular than the avaerage
+popular = Filter countRelations BY $1 > average.$2;
+
+final = FOREACH popular GENERATE $0;
 
 dump final;
---dump a;
-STORE final INTO '/Project2/Pig/TaskB/Test/taskD.csv' USING PigStorage(',');
