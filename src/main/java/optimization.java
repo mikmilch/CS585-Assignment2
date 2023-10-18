@@ -20,15 +20,25 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+/**
+ * d) An additional (advanced) algorithm that also uses Hadoop Map Reduce
+ * optimizations as discussed in class (e.g., a combiner). [5 pts]
+ */
+
 public class optimization {
 
+    // Boolean to keep track of threshold and whether to stop
     public static boolean end = false;
 
+    // Mapper that takes in dataset points with k centroids and maps each point to the nearest centroids
+    // Consumes the dataset points and k initial points
+    // Produces <Centroid, Point>
     public static class Map extends Mapper<LongWritable, Text, Text, Text> {
 
         private final Text outkey = new Text();
         private final Text outvalue = new Text();
 
+        // List to keep centroids (k initial points)
         ArrayList<String> centroidsList = new ArrayList<String>();
 
         /*
@@ -48,8 +58,6 @@ public class optimization {
             while (StringUtils.isNotEmpty(line = br.readLine())) {
                 try {
                     centroidsList.add(line);
-//                    String[] split = line.split("/t");
-//                    accessLogMap.put(split[0], split[1]);
                 }
                 catch (Exception e){
                     System.out.println(e);
@@ -102,7 +110,6 @@ public class optimization {
                 }
 
             }
-            System.out.println(centroid);
             outkey.set(centroid);
             outvalue.set(point);
             context.write(outkey, outvalue);
@@ -110,24 +117,30 @@ public class optimization {
         }
     }
 
+    // Takes in centroid and partial sum from the Combiner and calculate for the new centroid points based on points of each k cluster
+    // Consumes <Centroid, partial sum>
+    // Produces <New Centroid, >
     public static class Reduce extends Reducer<Text, Text, Text, NullWritable> {
 
         private Text newCentroid = new Text();
 
+        /*
+        Calculate the average of all the points in the cluster to get new centroids
+         */
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
             int newCentroidX = 0;
             int newCentroidY = 0;
             int count = 0;
 
-//            System.out.println(key);
-
-            // For each relationship of a user
+            // For each point belonging in the kmeans cluster
             for (Text value : values) {
-                String current = value.toString();
 
+                // Current Point
+                String current = value.toString();
                 String[] split = current.split(",");
 
+                // Add to sum and count to get average
                 int partialSumX = Integer.parseInt(split[0]);
                 int partialSumY = Integer.parseInt(split[1]);
                 int partialCount = Integer.parseInt(split[2]);
@@ -137,14 +150,19 @@ public class optimization {
                 count += partialCount;
             }
 
+            // New Centroid is the average of all the points in the cluster
             newCentroidX = (int) newCentroidX / count;
             newCentroidY = (int) newCentroidY / count;
 
+            // Old Centroid
             int oldCentroidX = Integer.parseInt(key.toString().split(",")[0]);
             int oldCentroidY = Integer.parseInt(key.toString().split(",")[1]);
 
+            // Distance Between new and old centroids
             double distance = Math.sqrt((Math.pow((newCentroidX - oldCentroidX), 2)) + (Math.pow((newCentroidY - oldCentroidY), 2)));
             System.out.println("Old Centroid: (" + oldCentroidX + ", " + oldCentroidY + "). New Centroid: (" + newCentroidX + ", " + newCentroidY + "). Distince: " + distance + ". Threshold: " + Integer.parseInt(context.getConfiguration().get("threshold")));
+
+            // If threshold Not Met (Some of the newer centroids move more than the threshold)
             if (distance >= Integer.parseInt(context.getConfiguration().get("threshold"))){
                 end = false;
             }
@@ -154,21 +172,24 @@ public class optimization {
         }
     }
 
+    // Combiner that takes in the outputs from the mapper and calculates the partial sum
+    // Comsumes <Centroid, Point>
+    // Produces <Centroid, Partial Sum>
     public static class Combiner extends Reducer<Text, Text, Text, Text> {
 
         private Text result = new Text();
 
         @Override
-        protected void reduce(Text key, Iterable<Text> values, Context context)
-                throws IOException, InterruptedException {
+        protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             int xSum = 0;
             int ySum = 0;
             int count = 0;
 
-            // For each relationship of a user
+            // For each point belonging in the kmeans cluster
             for (Text value : values) {
-                String current = value.toString();
 
+                // Current Point
+                String current = value.toString();
                 String[] split = current.split(",");
 
                 int currentx;
@@ -183,6 +204,7 @@ public class optimization {
                     currenty = Integer.parseInt((split[1]));
                 }
 
+                // Add to Partial Sum
                 xSum += currentx;
                 ySum += currenty;
                 count++;
@@ -198,7 +220,7 @@ public class optimization {
 
         end = true;
         Configuration conf = new Configuration();
-        Job job1 = Job.getInstance(conf, "Test");
+        Job job1 = Job.getInstance(conf, "Single Iteration KMeans");
 
         job1.setJarByClass(optimization.class);
         job1.setMapperClass(Map.class);
@@ -217,7 +239,8 @@ public class optimization {
         job1.waitForCompletion(true);
 
     }
-    //        job2.getConfiguration().set("join.type", "inner");
+
+    // Multi-Iteration KMean given r, the number of iterations, and ending threshold
     public static void looping(int r, String startInput, String tempOutput, String output, int threshold) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
         String currentTemp = tempOutput;
@@ -228,6 +251,7 @@ public class optimization {
 
             simple(startInput, currentTemp, currentOutput, threshold); //
 
+            // If Threshold Met, End
             if (end){
                 System.out.println("Threshold Met");
                 break;
@@ -237,22 +261,4 @@ public class optimization {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-
-        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
-//        String input = "/Users/mikaelamilch/Library/CloudStorage/OneDrive-WorcesterPolytechnicInstitute(wpi.edu)/2023-2024/CS 585/CS585-Assignment2/src/main/python/datasetTest.csv";
-//        String output = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/output/optimization";
-//        String output = "/Users/mikaelamilch/Desktop/output";
-
-        String output = "file:///C:/Users/nickl/OneDrive/Desktop/output/optimization";
-
-        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeans.csv";
-
-        long start = System.currentTimeMillis();
-        looping(100, input, temp, output, 500);
-
-        long end = System.currentTimeMillis();
-        long timeTaken = end - start;
-        System.out.println("Time Taken: " + timeTaken);
-    }
 }

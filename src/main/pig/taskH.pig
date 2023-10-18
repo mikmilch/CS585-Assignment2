@@ -1,4 +1,5 @@
-associates = LOAD '/Project1/Testing/associatesTest.csv' USING PigStorage(',') AS (FriendRel: int, PersonA_ID: int, PersonB_ID: int, DateofFriendship: int, Descr: chararray);
+--Load Associates
+associates = LOAD '/Project2/Data/Final/associates.csv' USING PigStorage(',') AS (FriendRel: int, PersonA_ID: int, PersonB_ID: int, DateofFriendship: int, Descr: chararray);
 
 -- Map PersonA_ID and PersonB_ID and the other way around
 clean1 = FOREACH associates GENERATE PersonA_ID, PersonB_ID;
@@ -31,4 +32,6 @@ popular = Filter countRelations BY $1 > average.$2;
 --Final
 final = FOREACH popular GENERATE $0;
 
+--Output
 dump final;
+STORE final INTO '/Project2/Output/TaskH/Final' USING PigStorage(',');

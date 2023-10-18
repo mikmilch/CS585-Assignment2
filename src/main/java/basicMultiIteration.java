@@ -20,20 +20,27 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+/**
+ * b) A (basic) multi-iteration K-means algorithm (remember to set the parameter R
+ * to terminate the process, e.g., R=10). [5 pts]
+ */
+
+
 public class basicMultiIteration {
 
-
-
+    // Mapper that takes in dataset points with k centroids and maps each point to the nearest centroids
+    // Consumes the dataset points and k initial points
+    // Produces <Centroid, Point>
     public static class Map extends Mapper<LongWritable, Text, Text, Text> {
 
         private final Text outkey = new Text();
         private final Text outvalue = new Text();
 
+        // List to keep centroids (k initial points)
         ArrayList<String> centroidsList = new ArrayList<String>();
 
-        /*
-        Read in K means data set and store in local memory
-         */
+
+        // Read in K means data set and store in local memory
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
             URI[] cacheFiles = context.getCacheFiles();
@@ -48,8 +55,6 @@ public class basicMultiIteration {
             while (StringUtils.isNotEmpty(line = br.readLine())) {
                 try {
                     centroidsList.add(line);
-//                    String[] split = line.split("/t");
-//                    accessLogMap.put(split[0], split[1]);
                 }
                 catch (Exception e){
                     System.out.println(e);
@@ -109,22 +114,29 @@ public class basicMultiIteration {
         }
     }
 
+    // Takes in centroid and point from the mapper and calculate for the new centroid points based on points of each k cluster
+    // Consumes <Centroid, Point>
+    // Produces <New Centroid, >
     public static class Reduce extends Reducer<Text, Text, Text, NullWritable> {
 
         private Text newCentroid = new Text();
 
+
+        /*
+        Calculate the average of all the points in the cluster to get new centroids
+         */
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
             int newCentroidX = 0;
             int newCentroidY = 0;
             int count = 0;
 
-            System.out.println(values);
-
-            // For each relationship of a user
+            // For each point belonging in the kmeans cluster
             for (Text value : values) {
-                String current = value.toString();
 
+                // Current Point
+
+                String current = value.toString();
                 String[] split = current.split(",");
 
                 int currentx;
@@ -139,27 +151,26 @@ public class basicMultiIteration {
                     currenty = Integer.parseInt((split[1]));
                 }
 
+                // Add to sum and count to get average
                 newCentroidX += currentx;
                 newCentroidY += currenty;
                 count++;
             }
 
+            // New Centroid is the average of all the points in the cluster
             newCentroidX = (int) newCentroidX / count;
             newCentroidY = (int) newCentroidY / count;
 
-//            System.out.println(newCentroidX);
             newCentroid.set(String.valueOf(newCentroidX) + "," + String.valueOf(newCentroidY)); // Key = averageX , averageY
 
-            context.write(newCentroid, null); // Write <key, value> = <User, Count of Relationships>
+            context.write(newCentroid, null); // Write <key, value> = <New Centroid, >
         }
     }
 
     private static void simple(String input, String tempOutput, String output) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
 
-
-        long start = System.currentTimeMillis();
         Configuration conf = new Configuration();
-        Job job1 = Job.getInstance(conf, "Test");
+        Job job1 = Job.getInstance(conf, "Single Iteration KMeans");
 
         job1.setJarByClass(basicMultiIteration.class);
         job1.setMapperClass(Map.class);
@@ -173,12 +184,10 @@ public class basicMultiIteration {
         FileInputFormat.addInputPath(job1, new Path(input));
         FileOutputFormat.setOutputPath(job1, new Path(output));
         job1.waitForCompletion(true);
-        long end = System.currentTimeMillis();
-        long timeTaken = end - start;
-        System.out.println("Time Taken: " + timeTaken);
 
     }
 
+    // Multi-Iteration KMean given r, the number of iterations
     public static void looping(int r, String startInput, String tempOutput, String output) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
         String currentTemp = tempOutput;
@@ -192,16 +201,5 @@ public class basicMultiIteration {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-
-        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
-//        String output = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/output";
-        String output = "file:///C:/Users/nickl/OneDrive/Desktop/output";
-
-        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeans.csv";
-
-        looping(3, input, temp, output);
-
-    }
 
 }
