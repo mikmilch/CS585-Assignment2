@@ -167,7 +167,7 @@ public class advancedMulti {
 
             // Distance Between new and old centroids
             double distance = Math.sqrt((Math.pow((newCentroidX - oldCentroidX), 2)) + (Math.pow((newCentroidY - oldCentroidY), 2)));
-            System.out.println("Old Centroid: (" + oldCentroidX + ", " + oldCentroidY + "). New Centroid: (" + newCentroidX + ", " + newCentroidY + "). Distince: " + distance + ". Threshold: " + Integer.parseInt(context.getConfiguration().get("threshold")));
+//            System.out.println("Old Centroid: (" + oldCentroidX + ", " + oldCentroidY + "). New Centroid: (" + newCentroidX + ", " + newCentroidY + "). Distince: " + distance + ". Threshold: " + Integer.parseInt(context.getConfiguration().get("threshold")));
 
             // If threshold Not Met (Some of the newer centroids move more than the threshold)
             if (distance >= Integer.parseInt(context.getConfiguration().get("threshold"))){
@@ -215,7 +215,7 @@ public class advancedMulti {
 
             // If Threshold Met, End
             if (end){
-                System.out.println("Threshold Met");
+//                System.out.println("Threshold Met");
                 break;
             }
 

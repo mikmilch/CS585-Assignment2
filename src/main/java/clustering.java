@@ -20,7 +20,7 @@ public class clustering {
 
         long start = System.currentTimeMillis();
 
-        System.out.println("\nMulti-Iteration KMeans (Iterations r = " + iterations);
+        System.out.println("\nMulti-Iteration (Basic) KMeans (Iterations r = " + iterations + ")");
         basicMultiIteration.looping(iterations, input, temp, output);
 
         long end = System.currentTimeMillis();
@@ -32,7 +32,7 @@ public class clustering {
 
         long start = System.currentTimeMillis();
 
-        System.out.println("\nMulti-Iteration KMeans (Iterations r = " + iterations + " With a threshold = " + threshold);
+        System.out.println("\nMulti-Iteration (Advanced) KMeans (Iterations r = " + iterations + ", Threshold = " + threshold + ")");
         advancedMulti.looping(iterations, input, temp, output, threshold);
 
         long end = System.currentTimeMillis();
@@ -44,7 +44,7 @@ public class clustering {
 
         long start = System.currentTimeMillis();
 
-        System.out.println("\nMulti-Iteration KMeans (Iterations r = " + iterations + " With a threshold = " + threshold);
+        System.out.println("\nMulti-Iteration (Optimized) KMeans (Iterations r = " + iterations + ", Threshold = " + threshold + ")");
         optimization.looping(iterations, input, temp, output, threshold);
 
         long end = System.currentTimeMillis();
@@ -57,7 +57,7 @@ public class clustering {
 
         long start = System.currentTimeMillis();
 
-        System.out.println("\nMulti-Iteration KMeans (Iterations r = " + iterations + " With a threshold = " + threshold + ". Variation = " + variation);
+        System.out.println("\nMulti-Iteration KMeans (Iterations r = " + iterations + ", Threshold = " + threshold + ", Variation = " + variation + ")");
         outputVariations.looping(iterations, input, temp, output, threshold, variation);
 
         long end = System.currentTimeMillis();
@@ -80,17 +80,17 @@ public class clustering {
 
         single(input, temp, singleOutput);
 
-        basic(3, input, temp, basicOutput);
+        basic(10, input, temp, basicOutput);
 
-        advanced(100, input, temp, advancedOutput, 500);
+        advanced(10, input, temp, advancedOutput, 200);
 
-        optimization(100, input, temp, optimizationOutput, 500);
+        optimization(10, input, temp, optimizationOutput, 200);
 
         String variation1 = "Only Cluster Points";
         String variation2 = "Final Clustered Points";
 
-        outputVariation(100, input, temp, variationOutput1, 500, variation1);
-        outputVariation(100, input, temp, variationOutput2, 500, variation2);
+        outputVariation(10, input, temp, variationOutput1, 200, variation1);
+        outputVariation(10, input, temp, variationOutput2, 200, variation2);
 
     }
 }

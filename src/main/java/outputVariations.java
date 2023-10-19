@@ -127,7 +127,8 @@ public class outputVariations {
 
     // Takes in centroid and partial sum from the Combiner and calculate for the new centroid points based on points of each k cluster
     // Consumes <Centroid, partial sum>
-    // Produces <New Centroid, >
+    // Produces <New Centroid, Points> if variation asks for points
+    // Produces <New Centroid, Threshold> if only centroids
     public static class Reduce extends Reducer<Text, Text, Text, Text> {
 
         private Text newCentroid = new Text();
@@ -173,7 +174,7 @@ public class outputVariations {
             int oldCentroidY = Integer.parseInt(key.toString().split(",")[1]);
 
             double distance = Math.sqrt((Math.pow((newCentroidX - oldCentroidX), 2)) + (Math.pow((newCentroidY - oldCentroidY), 2)));
-            System.out.println("Old Centroid: (" + oldCentroidX + ", " + oldCentroidY + "). New Centroid: (" + newCentroidX + ", " + newCentroidY + "). Distince: " + distance + ". Threshold: " + Integer.parseInt(context.getConfiguration().get("threshold")));
+//            System.out.println("Old Centroid: (" + oldCentroidX + ", " + oldCentroidY + "). New Centroid: (" + newCentroidX + ", " + newCentroidY + "). Distince: " + distance + ". Threshold: " + Integer.parseInt(context.getConfiguration().get("threshold")));
             if (distance >= Integer.parseInt(context.getConfiguration().get("threshold"))){
                 end = false;
             }
@@ -195,10 +196,10 @@ public class outputVariations {
             if (context.getConfiguration().get("variation").equals("Only Cluster Points")) {
                 if (end) {
                     context.write(new Text("Convergence Threshold Met"), null);
-                    System.out.println("End");
+//                    System.out.println("End");
                 } else {
                     context.write(new Text("Convergence Threshold NOT Met"), null);
-                    System.out.println("NOT End");
+//                    System.out.println("NOT End");
                 }
             }
         }
@@ -306,7 +307,7 @@ public class outputVariations {
             simple(startInput, currentTemp, currentOutput, threshold, variation); //
 
             if (end){
-                System.out.println("Threshold Met");
+//                System.out.println("Threshold Met");
                 break;
             }
 

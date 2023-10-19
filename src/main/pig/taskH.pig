@@ -1,3 +1,7 @@
+--Report all owners of a FaceInPage who are more popular than an average user, namely,
+--those who have more relationships than the average number of relationships across all
+--owners FaceInPages.
+
 --Load Associates
 associates = LOAD '/Project2/Data/Final/associates.csv' USING PigStorage(',') AS (FriendRel: int, PersonA_ID: int, PersonB_ID: int, DateofFriendship: int, Descr: chararray);
 

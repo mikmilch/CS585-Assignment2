@@ -19,6 +19,8 @@ usersValues = FOREACH faceInPage GENERATE ID, Name;
 
 -- Join to get only those who have not accessed a FaceInPage in 129600 minutes (90 Days)
 joined = JOIN filtered_pages BY group, usersValues BY ID;
+
+--For those users generate their Id and Name
 product = FOREACH joined GENERATE $2, $3;
 
 --Output
