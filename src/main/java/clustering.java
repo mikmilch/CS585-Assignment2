@@ -78,19 +78,19 @@ public class clustering {
         String variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/variation/2";
 
 
-//        single(input, temp, singleOutput);
+        single(input, temp, singleOutput);
 
         basic(10, input, temp, basicOutput);
 
-//        advanced(10, input, temp, advancedOutput, 200);
-//
-//        optimization(10, input, temp, optimizationOutput, 200);
-//
-//        String variation1 = "Only Cluster Points";
-//        String variation2 = "Final Clustered Points";
-//
-//        outputVariation(10, input, temp, variationOutput1, 200, variation1);
-//        outputVariation(10, input, temp, variationOutput2, 200, variation2);
+        advanced(10, input, temp, advancedOutput, 200);
+
+        optimization(10, input, temp, optimizationOutput, 200);
+
+        String variation1 = "Only Cluster Points";
+        String variation2 = "Final Clustered Points";
+
+        outputVariation(10, input, temp, variationOutput1, 200, variation1);
+        outputVariation(10, input, temp, variationOutput2, 200, variation2);
 
     }
 }

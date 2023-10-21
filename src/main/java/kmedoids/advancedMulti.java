@@ -161,14 +161,7 @@ public class advancedMulti {
 
             }
 
-            int oldCentroidX = Integer.parseInt(key.toString().split(",")[0]);
-            int oldCentroidY = Integer.parseInt(key.toString().split(",")[1]);
 
-            double centroidDistance = Math.sqrt((Math.pow((newCentroidX - oldCentroidX), 2)) + (Math.pow((newCentroidY - oldCentroidY), 2)));
-            System.out.println("Old Centroid: (" + oldCentroidX + ", " + oldCentroidY + "). New Centroid: (" + newCentroidX + ", " + newCentroidY + "). Distince: " + centroidDistance + ". Threshold: " + Integer.parseInt(context.getConfiguration().get("threshold")));
-            if (centroidDistance >= Integer.parseInt(context.getConfiguration().get("threshold"))){
-                end = false;
-            }
             newCentroid.set(String.valueOf(newCentroidX) + "," + String.valueOf(newCentroidY)); // Key = averageX , averageY
 
             context.write(newCentroid, null); // Write <key, value> = <User, Count of Relationships>
