@@ -77,11 +77,20 @@ public class optimization {
             // Data point x and y values
             String point = value.toString();
 
+
+            int x;
+            int y;
             // Split by Column
             String[] split = point.split(",");
 
-            int x = Integer.parseInt((split[0]));
-            int y = Integer.parseInt((split[1]));
+            if (split.length > 2) {
+                x = Integer.parseInt((split[3]));
+                y = Integer.parseInt((split[4]));
+
+            } else {
+                x = Integer.parseInt((split[0]));
+                y = Integer.parseInt((split[1]));
+            }
 
             for (int i = 0; i < centroidsList.size(); i++){
 
@@ -89,18 +98,9 @@ public class optimization {
 
                 String[] currentSplit = current.split(",");
 
-                int currentx;
-                int currenty;
 
-                if (split.length > 2) {
-                    currentx = Integer.parseInt((currentSplit[3]));
-                    currenty = Integer.parseInt((currentSplit[4]));
-
-                } else {
-                    currentx = Integer.parseInt((currentSplit[0]));
-                    currenty = Integer.parseInt((currentSplit[1]));
-                }
-
+                int currentx = Integer.parseInt(currentSplit[0]);
+                int currenty = Integer.parseInt(currentSplit[1]);
                 //Euclidean distance formula
                 double distance = Math.sqrt((Math.pow((currentx - x), 2)) + (Math.pow((currenty - y), 2)));
 

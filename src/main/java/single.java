@@ -1,32 +1,28 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 /**
- * b) A (basic) multi-iteration K-means algorithm (remember to set the parameter R
- * to terminate the process, e.g., R=10). [5 pts]
+ * a) A single-iteration K-means algorithm (R=1) [5 pts]
  */
 
-
-public class basicMultiIteration {
+public class single {
 
     // Mapper that takes in dataset points with k centroids and maps each point to the nearest centroids
     // Consumes the dataset points and k initial points
@@ -38,7 +34,6 @@ public class basicMultiIteration {
 
         // List to keep centroids (k initial points)
         ArrayList<String> centroidsList = new ArrayList<String>();
-
 
         // Read in K means data set and store in local memory
         @Override
@@ -71,6 +66,7 @@ public class basicMultiIteration {
 
             double minDistance = Double.MAX_VALUE;
             String centroid = "";
+
             // Data point x and y values
             String point = value.toString();
 
@@ -79,6 +75,7 @@ public class basicMultiIteration {
             // Split by Column
             String[] split = point.split(",");
 
+            // BYOD Data have different columns structure
             if (split.length > 2) {
                 x = Integer.parseInt((split[3]));
                 y = Integer.parseInt((split[4]));
@@ -91,6 +88,7 @@ public class basicMultiIteration {
             for (int i = 0; i < centroidsList.size(); i++){
 
                 String current = centroidsList.get(i);
+
 
                 String[] currentSplit = current.split(",");
 
@@ -121,7 +119,6 @@ public class basicMultiIteration {
 
         private Text newCentroid = new Text();
 
-
         /*
         Calculate the average of all the points in the cluster to get new centroids
          */
@@ -135,7 +132,6 @@ public class basicMultiIteration {
             for (Text value : values) {
 
                 // Current Point
-
                 String current = value.toString();
                 String[] split = current.split(",");
 
@@ -162,44 +158,29 @@ public class basicMultiIteration {
             newCentroidY = (int) newCentroidY / count;
 
             newCentroid.set(String.valueOf(newCentroidX) + "," + String.valueOf(newCentroidY)); // Key = averageX , averageY
-
             context.write(newCentroid, null); // Write <key, value> = <New Centroid, >
         }
     }
 
-    private static void simple(String input, String tempOutput, String output) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
+    public static void simple(String input, String temp, String output) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
 
         Configuration conf = new Configuration();
         Job job1 = Job.getInstance(conf, "Single Iteration KMeans");
 
-        job1.setJarByClass(basicMultiIteration.class);
+        job1.setJarByClass(single.class);
         job1.setMapperClass(Map.class);
         job1.setReducerClass(Reduce.class);
 
         job1.setOutputKeyClass(Text.class);
         job1.setOutputValueClass(Text.class);
 
-        job1.addCacheFile(new URI(tempOutput));
+        job1.addCacheFile(new URI(temp));
 
         FileInputFormat.addInputPath(job1, new Path(input));
         FileOutputFormat.setOutputPath(job1, new Path(output));
         job1.waitForCompletion(true);
 
+
     }
-
-    // Multi-Iteration KMean given r, the number of iterations
-    public static void looping(int r, String startInput, String tempOutput, String output) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
-
-        String currentTemp = tempOutput;
-        String Output = output;
-
-        for (int i = 0 ; i < r; i++){
-            String currentOutput = Output + "/" + i;
-
-            simple(startInput, currentTemp, currentOutput);
-            currentTemp = currentOutput + "/part-r-00000";
-        }
-    }
-
 
 }
