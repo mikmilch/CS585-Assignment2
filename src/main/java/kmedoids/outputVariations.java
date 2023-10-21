@@ -151,8 +151,6 @@ public class outputVariations {
                     currenty = Integer.parseInt((split[1]));
                 }
 
-                String currentPoint = currentx + ":" + currenty + ";";
-                points += currentPoint;
 
                 for (Text other : values) {
                     String otherPoint = other.toString();
@@ -162,6 +160,9 @@ public class outputVariations {
 
                     int otherx = Integer.parseInt(otherSplit[0]);
                     int othery = Integer.parseInt(otherSplit[1]);
+
+                    String currentPoint = otherx + ":" + othery + ";";
+                    points += currentPoint;
 
                     //Euclidean distance formula
                     double distance = Math.sqrt((Math.pow((currentx - otherx), 2)) + (Math.pow((currenty - othery), 2)));

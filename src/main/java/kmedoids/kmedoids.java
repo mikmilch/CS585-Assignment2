@@ -29,6 +29,12 @@ public class kmedoids {
         optimization.looping(iterations, input, temp, output, threshold);
 
     }
+
+    public static void outputVariation(int iterations, String input, String temp, String output, int threshold, String variation) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
+
+        outputVariations.looping(iterations, input, temp, output, threshold, variation);
+
+    }
     public static void main(String[] args) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
         String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
@@ -42,13 +48,19 @@ public class kmedoids {
         String variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/medoids/variation/2";
 
 
-        single(input, temp, singleOutput);
-
-        basic(3,input, temp, basicOutput);
-
-        advanced(100, input, temp, advancedOutput, 3000);
-
-        optimization(100, input, temp, optimizationOutput, 3000);
+//        single(input, temp, singleOutput);
+//
+//        basic(3,input, temp, basicOutput);
+//
+//        advanced(100, input, temp, advancedOutput, 3000);
+//
+//        optimization(100, input, temp, optimizationOutput, 3000);
+//
+//        String variation1 = "Only Cluster Points";
+        String variation2 = "Final Clustered Points";
+//
+//        outputVariation(100, input, temp, variationOutput1, 3000, variation1);
+        outputVariation(100, input, temp, variationOutput2, 3000, variation2);
     }
 
 }
