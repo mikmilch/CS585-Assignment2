@@ -1,12 +1,12 @@
 /* Get the ID of the 10 FaceIn pages with the most accesses based on the AccessLog. Return Id, Name and Nationality from FaceInPage. */
 
 --Load Access Logs
---accessLogs = LOAD 'shared_folder/accessLogsTest.csv' USING PigStorage(',') AS (ID:int, ByWho:int, WhatPage:int, TypeOfAccess:chararray, AccessTime:int);
-accessLogs = LOAD '/Project1/Testing/accessLogsTest.csv' USING PigStorage(',') AS (ID:int, ByWho:int, WhatPage:int, TypeOfAccess:chararray, AccessTime:int);
+--accessLogs = LOAD '/Project2/Data/Testing/accessLogsTest.csv' USING PigStorage(',') AS (ID:int, ByWho:int, WhatPage:int, TypeOfAccess:chararray, AccessTime:int);
+accessLogs = LOAD '/Project2/Data/Final/accessLogs.csv' USING PigStorage(',') AS (ID:int, ByWho:int, WhatPage:int, TypeOfAccess:chararray, AccessTime:int);
 
 --Load FaceInPage
---faceInPage = LOAD 'shared_folder/faceInPageTest.csv' USING PigStorage(',') AS (ID:int, Name:chararray, Nationality:chararray, CountryCode:int, Hobby:chararray);
-faceInPage = LOAD '/Project1/Testing/faceInPageTest.csv' USING PigStorage(',') AS (ID:int, Name:chararray, Nationality:chararray, CountryCode:int, Hobby:chararray);
+--faceInPage = LOAD '/Project2/Data/Testing/faceInPageTest.csv' USING PigStorage(',') AS (ID:int, Name:chararray, Nationality:chararray, CountryCode:int, Hobby:chararray);
+faceInPage = LOAD '/Project2/Data/Final/faceInPage.csv' USING PigStorage(',') AS (ID:int, Name:chararray, Nationality:chararray, CountryCode:int, Hobby:chararray);
 
 -- Group and Count by Page accessed
 group_pages = GROUP accessLogs BY WhatPage;
@@ -26,4 +26,4 @@ product = FOREACH joined GENERATE $2, $3, $4;
 --Output
 --STORE product INTO './output' USING PigStorage(',');
 
-STORE product INTO '/Project2/Output/TaskB/Test' USING PigStorage(',');
+STORE product INTO '/Project2/Output/TaskB/Final' USING PigStorage(',');

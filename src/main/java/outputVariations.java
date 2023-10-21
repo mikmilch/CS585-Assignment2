@@ -20,14 +20,28 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+/**
+ * e) For your K-means solution in subproblem (d) above, design two output
+ * variations:
+ *      i. return only cluster centers along with an indication if convergence has
+ *      been reached; [5 pts]
+ *      ii. return the final clustered data points along with their cluster centers. [5 pts]
+ */
+
 public class outputVariations {
+
+    // Boolean to keep track of threshold and whether to stop
     public static boolean end = false;
 
+    // Mapper that takes in dataset points with k centroids and maps each point to the nearest centroids
+    // Consumes the dataset points and k initial points
+    // Produces <Centroid, Point>
     public static class Map extends Mapper<LongWritable, Text, Text, Text> {
 
         private final Text outkey = new Text();
         private final Text outvalue = new Text();
 
+        // List to keep centroids (k initial points)
         ArrayList<String> centroidsList = new ArrayList<String>();
 
         /*
@@ -50,7 +64,6 @@ public class outputVariations {
                         continue;
                     }
                     String[] split = line.split("\t");
-                    System.out.println(split[0]);
                     centroidsList.add(split[0]);
 
                 }
@@ -71,7 +84,6 @@ public class outputVariations {
             String centroid = "";
             // Data point x and y values
             String point = value.toString();
-//            System.out.println("Map: " + point);
 
             int x;
             int y;
@@ -113,6 +125,10 @@ public class outputVariations {
         }
     }
 
+    // Takes in centroid and partial sum from the Combiner and calculate for the new centroid points based on points of each k cluster
+    // Consumes <Centroid, partial sum>
+    // Produces <New Centroid, Points> if variation asks for points
+    // Produces <New Centroid, Threshold> if only centroids
     public static class Reduce extends Reducer<Text, Text, Text, Text> {
 
         private Text newCentroid = new Text();
@@ -127,8 +143,6 @@ public class outputVariations {
             int count = 0;
 
             String points = "";
-
-
 
             // For each relationship of a user
             for (Text value : values) {
@@ -160,7 +174,7 @@ public class outputVariations {
             int oldCentroidY = Integer.parseInt(key.toString().split(",")[1]);
 
             double distance = Math.sqrt((Math.pow((newCentroidX - oldCentroidX), 2)) + (Math.pow((newCentroidY - oldCentroidY), 2)));
-            System.out.println("Old Centroid: (" + oldCentroidX + ", " + oldCentroidY + "). New Centroid: (" + newCentroidX + ", " + newCentroidY + "). Distince: " + distance + ". Threshold: " + Integer.parseInt(context.getConfiguration().get("threshold")));
+//            System.out.println("Old Centroid: (" + oldCentroidX + ", " + oldCentroidY + "). New Centroid: (" + newCentroidX + ", " + newCentroidY + "). Distince: " + distance + ". Threshold: " + Integer.parseInt(context.getConfiguration().get("threshold")));
             if (distance >= Integer.parseInt(context.getConfiguration().get("threshold"))){
                 end = false;
             }
@@ -182,16 +196,21 @@ public class outputVariations {
             if (context.getConfiguration().get("variation").equals("Only Cluster Points")) {
                 if (end) {
                     context.write(new Text("Convergence Threshold Met"), null);
-                    System.out.println("End");
+//                    System.out.println("End");
                 } else {
                     context.write(new Text("Convergence Threshold NOT Met"), null);
-                    System.out.println("NOT End");
+//                    System.out.println("NOT End");
                 }
             }
         }
 
     }
 
+
+    // Combiner that takes in the outputs from the mapper and calculates the partial sum
+    // Comsumes <Centroid, Point>
+    // Produces <Centroid, Partial Sum> if variation only wants centroid
+    // Produces <Centroid, Partial Sum + List of Points> if variation wants points
     public static class Combiner extends Reducer<Text, Text, Text, Text> {
 
         private Text result = new Text();
@@ -205,11 +224,11 @@ public class outputVariations {
 
 
 
-            // For each relationship of a user
+            // For each point belonging in the kmeans cluster
             for (Text value : values) {
 
+                // Current Point
                 String current = value.toString();
-
                 int currentx;
                 int currenty;
 
@@ -224,21 +243,25 @@ public class outputVariations {
                     currenty = Integer.parseInt((split[1]));
                 }
 
+                // Add Points
                 String currentPoint = currentx + ":" + currenty + ";";
                 points += currentPoint;
 
+                // Add to Partial Sum
                 xSum += currentx;
                 ySum += currenty;
                 count++;
             }
 
+            // If only cluster points
             if (context.getConfiguration().get("variation").equals("Only Cluster Points")) {
 
-                // Emit the partial sum and count
+                // Return the partial sum and count
                 result.set(xSum+","+ySum+","+count);
                 context.write(key, result);
             }
             else{
+                // Add the points along with the partial sum
                 result.set(xSum+","+ySum+","+count +"," + points);
                 context.write(key, result);
 
@@ -251,7 +274,7 @@ public class outputVariations {
 
         end = true;
         Configuration conf = new Configuration();
-        Job job1 = Job.getInstance(conf, "Test");
+        Job job1 = Job.getInstance(conf, "Single Iteration KMeans");
 
         job1.setJarByClass(optimization.class);
         job1.setMapperClass(Map.class);
@@ -271,7 +294,8 @@ public class outputVariations {
         job1.waitForCompletion(true);
 
     }
-    //        job2.getConfiguration().set("join.type", "inner");
+
+    // Multi-Iteration KMean given r, the number of iterations, ending threshold, and variation
     public static void looping(int r, String startInput, String tempOutput, String output, int threshold, String variation) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
         String currentTemp = tempOutput;
@@ -283,7 +307,7 @@ public class outputVariations {
             simple(startInput, currentTemp, currentOutput, threshold, variation); //
 
             if (end){
-                System.out.println("Threshold Met");
+//                System.out.println("Threshold Met");
                 break;
             }
 
@@ -291,27 +315,5 @@ public class outputVariations {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-
-        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
-//        String input = "/Users/mikaelamilch/Library/CloudStorage/OneDrive-WorcesterPolytechnicInstitute(wpi.edu)/2023-2024/CS 585/CS585-Assignment2/src/main/python/datasetTest.csv";
-//        String output = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/output/optimization";
-//        String output = "/Users/mikaelamilch/Desktop/output";
-
-        String output = "file:///C:/Users/nickl/OneDrive/Desktop/output/variations";
-
-        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeans.csv";
-
-        String variation1 = "Only Cluster Points";
-        String variation2 = "Final Clustered Points";
-
-        long start = System.currentTimeMillis();
-//        looping(100, input, temp, output, 500, variation1);
-        looping(100, input, temp, output, 500, variation2);
-
-        long end = System.currentTimeMillis();
-        long timeTaken = end - start;
-        System.out.println("Time Taken: " + timeTaken);
-    }
 
 }

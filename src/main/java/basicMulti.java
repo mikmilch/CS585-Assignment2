@@ -1,62 +1,48 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.*;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
-public class kmeans {
-
-
-//    Step 2 (Clustering the Data):
-//    Develop the K-means clustering strategies described below using java map-reduce
-//    jobs. You should document the differences between your solutions, i.e., what changes
-//    were made to the mapper, at the reducer, number of mappers/reducers, or in the
-//    main control program. These algorithms should include:
-//    a) A single-iteration K-means algorithm (R=1) [5 pts]
-//    b) A (basic) multi-iteration K-means algorithm (remember to set the parameter R
-//            to terminate the process, e.g., R=10). [5 pts]
-//    c) An additional (advanced) multi-iteration K-means algorithm that terminates
-//    potentially earlier if it converges based on some threshold. [5 pts]
-//    d) An additional (advanced) algorithm that also uses Hadoop Map Reduce
-//    optimizations as discussed in class (e.g., a combiner). [5 pts]
-//    e) For your K-means solution in subproblem (d) above, design two output
-//    variations:
-//    i. return only cluster centers along with an indication if convergence has
-//    been reached; [5 pts]
-//    ii. return the final clustered data points along with their cluster centers. [5
-//    pts]
-//    f) Provide a description for each of your above five solutions in your report and
-//    conduct experiments over them, for example by choosing different K values
-//    and different R values. describe the relative performance, explain, and analyze
-//    your findings. [10 pts]
-//    Note: Since the algorithm is iterative, you need your main program that generates the
-//    map-reduce jobs to also control whether it should start another iteration.
+/**
+ * b) A (basic) multi-iteration K-means algorithm (remember to set the parameter R
+ * to terminate the process, e.g., R=10). [5 pts]
+ */
 
 
+public class basicMulti {
+    // Boolean to keep track of threshold and whether to stop
+    public static boolean end = false;
+
+    // Mapper that takes in dataset points with k centroids and maps each point to the nearest centroids
+    // Consumes the dataset points and k initial points
+    // Produces <Centroid, Point>
     public static class Map extends Mapper<LongWritable, Text, Text, Text> {
 
         private final Text outkey = new Text();
         private final Text outvalue = new Text();
 
+        // List to keep centroids (k initial points)
         ArrayList<String> centroidsList = new ArrayList<String>();
 
-        /*
-        Read in K means data set and store in local memory
-         */
+
+        // Read in K means data set and store in local memory
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
             URI[] cacheFiles = context.getCacheFiles();
@@ -71,8 +57,6 @@ public class kmeans {
             while (StringUtils.isNotEmpty(line = br.readLine())) {
                 try {
                     centroidsList.add(line);
-//                    String[] split = line.split("/t");
-//                    accessLogMap.put(split[0], split[1]);
                 }
                 catch (Exception e){
                     System.out.println(e);
@@ -110,7 +94,6 @@ public class kmeans {
 
                 String current = centroidsList.get(i);
 
-
                 String[] currentSplit = current.split(",");
 
                 int currentx = Integer.parseInt(currentSplit[0]);
@@ -133,22 +116,29 @@ public class kmeans {
         }
     }
 
+    // Takes in centroid and point from the mapper and calculate for the new centroid points based on points of each k cluster
+    // Consumes <Centroid, Point>
+    // Produces <New Centroid, >
     public static class Reduce extends Reducer<Text, Text, Text, NullWritable> {
 
         private Text newCentroid = new Text();
 
+
+        /*
+        Calculate the average of all the points in the cluster to get new centroids
+         */
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
             int newCentroidX = 0;
             int newCentroidY = 0;
             int count = 0;
 
-
-            // For each relationship of a user
+            // For each point belonging in the kmeans cluster
             for (Text value : values) {
-                String current = value.toString();
-                System.out.println(current);
 
+                // Current Point
+
+                String current = value.toString();
                 String[] split = current.split(",");
 
                 int currentx;
@@ -163,57 +153,69 @@ public class kmeans {
                     currenty = Integer.parseInt((split[1]));
                 }
 
-
-
+                // Add to sum and count to get average
                 newCentroidX += currentx;
                 newCentroidY += currenty;
                 count++;
             }
 
+
+            // Old Centroid
+            int oldCentroidX = Integer.parseInt(key.toString().split(",")[0]);
+            int oldCentroidY = Integer.parseInt(key.toString().split(",")[1]);
+
+            // Distance Between new and old centroids
+            double distance = Math.sqrt((Math.pow((newCentroidX - oldCentroidX), 2)) + (Math.pow((newCentroidY - oldCentroidY), 2)));
+
+            // If Not Same Centroids
+            if (distance >= 0){
+                end = false; // Not end
+            }
+
+            // New Centroid is the average of all the points in the cluster
             newCentroidX = (int) newCentroidX / count;
             newCentroidY = (int) newCentroidY / count;
 
-//            System.out.println(newCentroidX);
             newCentroid.set(String.valueOf(newCentroidX) + "," + String.valueOf(newCentroidY)); // Key = averageX , averageY
 
-            context.write(newCentroid, null); // Write <key, value> = <User, Count of Relationships>
+            context.write(newCentroid, null); // Write <key, value> = <New Centroid, >
         }
     }
 
-    public static void simple(String input, String temp, String output) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
+    private static void simple(String input, String tempOutput, String output) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
 
-
-        long start = System.currentTimeMillis();
+        end = true;
         Configuration conf = new Configuration();
-        Job job1 = Job.getInstance(conf, "Test");
+        Job job1 = Job.getInstance(conf, "Single Iteration KMeans");
 
-        job1.setJarByClass(kmeans.class);
+        job1.setJarByClass(basicMulti.class);
         job1.setMapperClass(Map.class);
         job1.setReducerClass(Reduce.class);
 
         job1.setOutputKeyClass(Text.class);
         job1.setOutputValueClass(Text.class);
 
-        job1.addCacheFile(new URI(temp));
+        job1.addCacheFile(new URI(tempOutput));
 
         FileInputFormat.addInputPath(job1, new Path(input));
         FileOutputFormat.setOutputPath(job1, new Path(output));
         job1.waitForCompletion(true);
-        long end = System.currentTimeMillis();
-        long timeTaken = end - start;
-        System.out.println("Time Taken: " + timeTaken);
 
     }
 
-    public static void main(String[] args) throws Exception {
+    // Multi-Iteration KMean given r, the number of iterations
+    public static void looping(int r, String startInput, String tempOutput, String output) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
-//        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
-        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/datasetTest.csv";
+        String currentTemp = tempOutput;
+        String Output = output;
 
-        String output = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/output";
+        for (int i = 0 ; i < r; i++){
+            String currentOutput = Output + "/" + i;
 
-        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeansTest.csv";
-        simple(input, temp, output);
-
+            simple(startInput, currentTemp, currentOutput);
+            currentTemp = currentOutput + "/part-r-00000";
+        }
     }
+
+
 }
