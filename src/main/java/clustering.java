@@ -70,24 +70,99 @@ public class clustering {
         String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
         String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeans.csv";
 
-        String singleOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/single";
-        String basicOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/basic";
-        String advancedOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/advanced";
-        String optimizationOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/optimization";
-        String variationOutput1 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/variation/1";
-        String variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/variation/2";
+        String singleOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k5/single";
+        String basicOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k5/basic";
+        String advancedOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k5/advanced";
+        String optimizationOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k5/optimization";
+        String variationOutput1 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k5/variation/1";
+        String variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k5/variation/2";
 
+        System.out.println("Running with k = 5 Initial Centroids");
 
         single(input, temp, singleOutput);
 
-        basic(10, input, temp, basicOutput);
+        basic(4, input, temp, basicOutput + "/4");
+        basic(10, input, temp, basicOutput + "/10");
+        basic(100, input, temp, basicOutput + "/100");
 
-        advanced(10, input, temp, advancedOutput, 200);
+        advanced(10, input, temp, advancedOutput + "/10", 200);
+        advanced(100, input, temp, advancedOutput + "/100/200", 200);
+        advanced(100, input, temp, advancedOutput + "/100/2000", 2000);
 
-        optimization(10, input, temp, optimizationOutput, 200);
+        optimization(10, input, temp, optimizationOutput + "/10", 200);
+        optimization(100, input, temp, optimizationOutput + "/100/200", 200);
+        optimization(100, input, temp, optimizationOutput + "/100/2000", 2000);
+
 
         String variation1 = "Only Cluster Points";
         String variation2 = "Final Clustered Points";
+
+        outputVariation(10, input, temp, variationOutput1, 200, variation1);
+        outputVariation(10, input, temp, variationOutput2, 200, variation2);
+
+        System.out.println("\n");
+
+
+        input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
+        temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeans10.csv";
+
+        singleOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k10/single";
+        basicOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k10/basic";
+        advancedOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k10/advanced";
+        optimizationOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k10/optimization";
+        variationOutput1 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k10/variation/1";
+        variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k10/variation/2";
+
+        System.out.println("Running with k = 10 Initial Centroids");
+
+        single(input, temp, singleOutput);
+
+        basic(4, input, temp, basicOutput + "/4");
+        basic(10, input, temp, basicOutput + "/10");
+        basic(100, input, temp, basicOutput + "/100");
+
+        advanced(10, input, temp, advancedOutput + "/10", 200);
+        advanced(100, input, temp, advancedOutput + "/100/200", 200);
+        advanced(100, input, temp, advancedOutput + "/100/2000", 2000);
+
+        optimization(10, input, temp, optimizationOutput + "/10", 200);
+        optimization(100, input, temp, optimizationOutput + "/100/200", 200);
+        optimization(100, input, temp, optimizationOutput + "/100/2000", 2000);
+
+
+        outputVariation(10, input, temp, variationOutput1, 200, variation1);
+        outputVariation(10, input, temp, variationOutput2, 200, variation2);
+
+        System.out.println("\n");
+
+
+
+        input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
+        temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeans100.csv";
+
+        singleOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k100/single";
+        basicOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k100/basic";
+        advancedOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k100/advanced";
+        optimizationOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k100/optimization";
+        variationOutput1 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k100/variation/1";
+        variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/clustering/k100/variation/2";
+
+        System.out.println("Running with k = 100 Initial Centroids");
+
+        single(input, temp, singleOutput);
+
+        basic(4, input, temp, basicOutput + "/4");
+        basic(10, input, temp, basicOutput + "/10");
+        basic(100, input, temp, basicOutput + "/100");
+
+        advanced(10, input, temp, advancedOutput + "/10", 200);
+        advanced(100, input, temp, advancedOutput + "/100/200", 200);
+        advanced(100, input, temp, advancedOutput + "/100/2000", 2000);
+
+        optimization(10, input, temp, optimizationOutput + "/10", 200);
+        optimization(100, input, temp, optimizationOutput + "/100/200", 200);
+        optimization(100, input, temp, optimizationOutput + "/100/2000", 2000);
+
 
         outputVariation(10, input, temp, variationOutput1, 200, variation1);
         outputVariation(10, input, temp, variationOutput2, 200, variation2);

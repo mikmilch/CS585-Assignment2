@@ -164,17 +164,19 @@ public class basicMulti {
             int oldCentroidX = Integer.parseInt(key.toString().split(",")[0]);
             int oldCentroidY = Integer.parseInt(key.toString().split(",")[1]);
 
-            // Distance Between new and old centroids
-            double distance = Math.sqrt((Math.pow((newCentroidX - oldCentroidX), 2)) + (Math.pow((newCentroidY - oldCentroidY), 2)));
 
-            // If Not Same Centroids
-            if (distance >= 0){
-                end = false; // Not end
-            }
 
             // New Centroid is the average of all the points in the cluster
             newCentroidX = (int) newCentroidX / count;
             newCentroidY = (int) newCentroidY / count;
+
+            // Distance Between new and old centroids
+            double distance = Math.sqrt((Math.pow((newCentroidX - oldCentroidX), 2)) + (Math.pow((newCentroidY - oldCentroidY), 2)));
+
+            // If Not Same Centroids
+            if (distance > 0){
+                end = false; // Not end
+            }
 
             newCentroid.set(String.valueOf(newCentroidX) + "," + String.valueOf(newCentroidY)); // Key = averageX , averageY
 
@@ -213,6 +215,11 @@ public class basicMulti {
             String currentOutput = Output + "/" + i;
 
             simple(startInput, currentTemp, currentOutput);
+
+            if (end){
+                break;
+            }
+
             currentTemp = currentOutput + "/part-r-00000";
         }
     }
