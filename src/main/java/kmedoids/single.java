@@ -22,14 +22,22 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+/**
+ * a) A single-iteration K-means algorithm (R=1) [5 pts]
+ */
+
 public class single {
 
 
+    // Mapper that takes in dataset points with k centroids and maps each point to the nearest centroids
+    // Consumes the dataset points and k initial points
+    // Produces <Centroid, Point>
     public static class Map extends Mapper<LongWritable, Text, Text, Text> {
 
         private final Text outkey = new Text();
         private final Text outvalue = new Text();
 
+        // List to keep centroids (k initial points)
         ArrayList<String> centroidsList = new ArrayList<String>();
 
         /*
@@ -49,8 +57,6 @@ public class single {
             while (StringUtils.isNotEmpty(line = br.readLine())) {
                 try {
                     centroidsList.add(line);
-//                    String[] split = line.split("/t");
-//                    accessLogMap.put(split[0], split[1]);
                 }
                 catch (Exception e){
                     System.out.println(e);
@@ -111,10 +117,17 @@ public class single {
         }
     }
 
+    // Takes in centroid and point from the mapper and calculate for the new centroid points based on points of each k cluster
+    // Instead of Taking the Average / Calculate the best medoid from existing points by getting the total distance from that point of all points
+    // Consumes <Centroid, Point>
+    // Produces <New Centroid, >
     public static class Reduce extends Reducer<Text, Text, Text, NullWritable> {
 
         private Text newCentroid = new Text();
 
+        /*
+        Calculate the total distance of all of the points from a existing point (current medoid)
+         */
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
             int newCentroidX = 0;
@@ -123,20 +136,20 @@ public class single {
 
             int minDistance = Integer.MAX_VALUE;
 
+            // For each point belonging in the kmeans cluster
             for (Text value : values) {
                 int sumDistance = 0;
 
                 String current = value.toString();
-                System.out.println(current);
 
                 String[] split = current.split(",");
 
                 int currentx = Integer.parseInt(split[0]);
                 int currenty = Integer.parseInt(split[1]);
 
+                // For every other point
                 for (Text other : values){
                     String otherPoint = other.toString();
-                    System.out.println(current);
 
                     String[] otherSplit = otherPoint.split(",");
 
@@ -146,12 +159,14 @@ public class single {
                     //Euclidean distance formula
                     double distance = Math.sqrt((Math.pow((currentx - otherx), 2)) + (Math.pow((currenty - othery), 2)));
 
+                    // Get Total distance
                     sumDistance += (int) distance;
                     if (sumDistance > minDistance){
                         break;
                     }
                 }
 
+                // Get Best medoid point
                 if (sumDistance < minDistance){
                     minDistance = sumDistance;
                     newCentroidX = currentx;
@@ -167,10 +182,8 @@ public class single {
 
     public static void simple(String input, String temp, String output) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
 
-
-        long start = System.currentTimeMillis();
         Configuration conf = new Configuration();
-        Job job1 = Job.getInstance(conf, "Test");
+        Job job1 = Job.getInstance(conf, "Single Iteration KMedoid");
 
         job1.setJarByClass(single.class);
         job1.setMapperClass(Map.class);
@@ -185,20 +198,8 @@ public class single {
         FileOutputFormat.setOutputPath(job1, new Path(output));
         job1.waitForCompletion(true);
         long end = System.currentTimeMillis();
-        long timeTaken = end - start;
-        System.out.println("Time Taken: " + timeTaken);
+
 
     }
 
-    public static void main(String[] args) throws Exception {
-
-//        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
-        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/datasetTest.csv";
-
-        String output = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/output";
-
-        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmedoids.csv";
-        simple(input, temp, output);
-
-    }
 }

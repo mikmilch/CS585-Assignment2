@@ -23,9 +23,14 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 public class advancedMulti {
+
+    // Boolean to keep track of threshold and whether to stop
     public static boolean end = false;
 
 
+    // Mapper that takes in dataset points with k centroids and maps each point to the nearest centroids
+    // Consumes the dataset points and k initial points
+    // Produces <Centroid, Point>
     public static class Map extends Mapper<LongWritable, Text, Text, Text> {
 
         private final Text outkey = new Text();
@@ -50,8 +55,6 @@ public class advancedMulti {
             while (StringUtils.isNotEmpty(line = br.readLine())) {
                 try {
                     centroidsList.add(line);
-//                    String[] split = line.split("/t");
-//                    accessLogMap.put(split[0], split[1]);
                 }
                 catch (Exception e){
                     System.out.println(e);
@@ -112,10 +115,15 @@ public class advancedMulti {
         }
     }
 
+    // Takes in centroid and point from the mapper and calculate for the new centroid points based on points of each k cluster
+    // Instead of Taking the Average / Calculate the best medoid from existing points by getting the total distance from that point of all points
+    // Consumes <Centroid, Point>
+    // Produces <New Centroid, >
     public static class Reduce extends Reducer<Text, Text, Text, NullWritable> {
 
         private Text newCentroid = new Text();
 
+        // Calculate the total distance of all of the points from a existing point (current medoid)
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
             int newCentroidX = 0;
@@ -124,20 +132,19 @@ public class advancedMulti {
 
             int minDistance = Integer.MAX_VALUE;
 
+            // For each point belonging in the kmeans cluster
             for (Text value : values) {
                 int sumDistance = 0;
 
                 String current = value.toString();
-//                System.out.println(current);
-
                 String[] split = current.split(",");
 
                 int currentx = Integer.parseInt(split[0]);
                 int currenty = Integer.parseInt(split[1]);
 
+                // For every other point
                 for (Text other : values){
                     String otherPoint = other.toString();
-//                    System.out.println(current);
 
                     String[] otherSplit = otherPoint.split(",");
 
@@ -147,18 +154,33 @@ public class advancedMulti {
                     //Euclidean distance formula
                     double distance = Math.sqrt((Math.pow((currentx - otherx), 2)) + (Math.pow((currenty - othery), 2)));
 
+                    // Get Total distance
                     sumDistance += (int) distance;
                     if (sumDistance > minDistance){
                         break;
                     }
                 }
 
+                // Get Best medoid point
                 if (sumDistance < minDistance){
                     minDistance = sumDistance;
                     newCentroidX = currentx;
                     newCentroidY = currenty;
                 }
 
+            }
+
+            // Old Centroid
+            int oldCentroidX = Integer.parseInt(key.toString().split(",")[0]);
+            int oldCentroidY = Integer.parseInt(key.toString().split(",")[1]);
+
+            // Distance Between new and old centroids
+            double distance = Math.sqrt((Math.pow((newCentroidX - oldCentroidX), 2)) + (Math.pow((newCentroidY - oldCentroidY), 2)));
+//            System.out.println("Old Centroid: (" + oldCentroidX + ", " + oldCentroidY + "). New Centroid: (" + newCentroidX + ", " + newCentroidY + "). Distince: " + distance + ". Threshold: " + Integer.parseInt(context.getConfiguration().get("threshold")));
+
+            // If threshold Not Met (Some of the newer centroids move more than the threshold)
+            if (distance >= Integer.parseInt(context.getConfiguration().get("threshold"))){
+                end = false; // Not end
             }
 
 
@@ -170,9 +192,8 @@ public class advancedMulti {
 
     public static void simple(String input, String temp, String output, int threshold) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
         end = true;
-        long start = System.currentTimeMillis();
         Configuration conf = new Configuration();
-        Job job1 = Job.getInstance(conf, "Test");
+        Job job1 = Job.getInstance(conf, "Single Iteration KMedoids");
 
         job1.setJarByClass(basicMulti.class);
         job1.setMapperClass(Map.class);
@@ -189,12 +210,12 @@ public class advancedMulti {
         FileInputFormat.addInputPath(job1, new Path(input));
         FileOutputFormat.setOutputPath(job1, new Path(output));
         job1.waitForCompletion(true);
-        long end = System.currentTimeMillis();
-        long timeTaken = end - start;
-        System.out.println("Time Taken: " + timeTaken);
+
 
     }
 
+
+    // Multi-Iteration Kmedoids given r, the number of iterations, and ending threshold
     public static void looping(int r, String startInput, String tempOutput, String output, int threshold) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException {
 
         String currentTemp = tempOutput;
@@ -206,7 +227,6 @@ public class advancedMulti {
             simple(startInput, currentTemp, currentOutput, threshold);
 
             if (end){
-                System.out.println("Threshold Met");
                 break;
             }
 

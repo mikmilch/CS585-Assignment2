@@ -69,13 +69,13 @@ def kmedoids(filepath, k):
     data = pd.read_csv(filepath)
     xlist = []
     ylist = []
+    kmedoids_dataset = pd.DataFrame(columns=features)
 
     for i in range(k):
         current = random.randint(0, 5000)
         duplicates(current)
 
     for i in range(k):
-        print(dataset.values[medoidsList[i]][0])
         xlist.append(data.values[medoidsList[i]][0])
         ylist.append(data.values[medoidsList[i]][1])
     kmedoids_dataset["x"] = xlist
@@ -83,7 +83,7 @@ def kmedoids(filepath, k):
 
     print(kmedoids_dataset)
 
-    kmedoids_dataset.to_csv("kmedoidsTest.csv", index=False, header=None)
+    kmedoids_dataset.to_csv("kmedoids" + str(k) + ".csv", index=False, header=None)
 
 
 
@@ -92,11 +92,19 @@ if __name__ == '__main__':
 
     print("Main Function")
     dataset_creation()
-    x_list = []
-    y_list = []
-    dups = []
-    kmeans(5)
-    kmeans(10)
-    kmeans(100)
-    # kmedoids("dataset.csv", 5)
+    # x_list = []
+    # y_list = []
+    # dups = []
+    # kmeans(5)
+    # kmeans(10)
+    # kmeans(100)
+    kmedoids("dataset.csv", 5)
+    medoidsList = []
+    xlist = []
+    ylist = []
+    kmedoids("dataset.csv", 10)
+    medoidsList = []
+    xlist = []
+    ylist = []
+    kmedoids("dataset.csv", 100)
 

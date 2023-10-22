@@ -23,9 +23,14 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 public class outputVariations {
+
+    // Boolean to keep track of threshold and whether to stop
     public static boolean end = false;
 
 
+    // Mapper that takes in dataset points with k centroids and maps each point to the nearest centroids
+    // Consumes the dataset points and k initial points
+    // Produces <Centroid, Point>
     public static class Map extends Mapper<LongWritable, Text, Text, Text> {
 
         private final Text outkey = new Text();
@@ -53,10 +58,7 @@ public class outputVariations {
                         continue;
                     }
                     String[] split = line.split("\t");
-                    System.out.println(split[0]);
-                    centroidsList.add(line);
-//                    String[] split = line.split("/t");
-//                    accessLogMap.put(split[0], split[1]);
+                    centroidsList.add(split[0]);
                 }
                 catch (Exception e){
                     System.out.println(e);
@@ -117,6 +119,10 @@ public class outputVariations {
         }
     }
 
+    // Combiner that takes in the outputs from the mapper and calculates the distance of each point as the medoid in the cluster
+    // Comsumes <Centroid, Point>
+    // Produces <Centroid, Medoid + Distance> if variation only wants centroid
+    // Produces <Centroid, Medoid + Distance + Points> if variation wants points
     public static class Combiner extends Reducer<Text, Text, Text, Text> {
 
         private Text result = new Text();
@@ -124,18 +130,13 @@ public class outputVariations {
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
-            int newCentroidX = 0;
-            int newCentroidY = 0;
-            int count = 0;
             String points = "";
 
-            int minDistance = Integer.MAX_VALUE;
-
+            // For each point belonging in the kmeans cluster
             for (Text value : values) {
                 int sumDistance = 0;
 
                 String current = value.toString();
-                //                System.out.println(current);
 
                 int currentx;
                 int currenty;
@@ -151,10 +152,9 @@ public class outputVariations {
                     currenty = Integer.parseInt((split[1]));
                 }
 
-
+                // For other points belonging in the kmeans cluster
                 for (Text other : values) {
                     String otherPoint = other.toString();
-                    //                    System.out.println(current);
 
                     String[] otherSplit = otherPoint.split(",");
 
@@ -171,30 +171,34 @@ public class outputVariations {
 
                 }
 
+                // If only cluster points
                 if (context.getConfiguration().get("variation").equals("Only Cluster Points")) {
 
-                    // Emit the partial sum and count
+                    // Return the total distance
                     result.set(currentx+","+currenty+","+sumDistance);
                     context.write(key, result);
                 }
                 else{
+                    // Return the total distance and points
                     result.set(currentx+","+currenty+","+sumDistance +"," + points);
                     context.write(key, result);
 
                 }
-                //result.set(currentx + "," + currenty + "," + sumDistance);
-                //context.write(key, result);
 
             }
         }
     }
 
+    // Takes in centroid and distance from the Combiner and determine the best point as a medoid by the lowest total distance between points
+    // Consumes <Centroid, Point + Distance (+ Points)>
+    // Produces <New Centroid, >
     public static class Reduce extends Reducer<Text, Text, Text, Text> {
 
         private Text newCentroid = new Text();
 
         private Text outPoints = new Text();
 
+        // Determine the best Medoid from distance
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
             int newCentroidX = 0;
@@ -204,6 +208,7 @@ public class outputVariations {
 
             int minDistance = Integer.MAX_VALUE;
 
+            // For each point belonging in the kmeans cluster
             for (Text value : values) {
                 String current = value.toString();
 
@@ -213,6 +218,7 @@ public class outputVariations {
                 int currenty = Integer.parseInt(split[1]);
                 int sumDistance = Integer.parseInt(split[2]);
 
+                // Get best medoid, Least total distance
                 if (sumDistance < minDistance) {
                     minDistance = sumDistance;
                     newCentroidX = currentx;
@@ -229,11 +235,14 @@ public class outputVariations {
 
             }
 
+            // Old Centroid
             int oldCentroidX = Integer.parseInt(key.toString().split(",")[0]);
             int oldCentroidY = Integer.parseInt(key.toString().split(",")[1]);
 
+            //Euclidean distance formula
             double centroidDistance = Math.sqrt((Math.pow((newCentroidX - oldCentroidX), 2)) + (Math.pow((newCentroidY - oldCentroidY), 2)));
-            System.out.println("Old Centroid: (" + oldCentroidX + ", " + oldCentroidY + "). New Centroid: (" + newCentroidX + ", " + newCentroidY + "). Distince: " + centroidDistance + ". Threshold: " + Integer.parseInt(context.getConfiguration().get("threshold")));
+
+            // If threshold Not Met (Some of the newer centroids move more than the threshold)
             if (centroidDistance >= Integer.parseInt(context.getConfiguration().get("threshold"))){
                 end = false;
             }
@@ -247,18 +256,14 @@ public class outputVariations {
                 outPoints.set(points);
                 context.write(newCentroid, outPoints);
             }
-            //newCentroid.set(String.valueOf(newCentroidX) + "," + String.valueOf(newCentroidY)); // Key = averageX , averageY
-            //context.write(newCentroid, null); // Write <key, value> = <User, Count of Relationships>
         }
 
         public void cleanup(Context context) throws IOException, InterruptedException {
             if (context.getConfiguration().get("variation").equals("Only Cluster Points")) {
                 if (end) {
                     context.write(new Text("Convergence Threshold Met"), null);
-                    System.out.println("End");
                 } else {
                     context.write(new Text("Convergence Threshold NOT Met"), null);
-                    System.out.println("NOT End");
                 }
             }
         }
@@ -266,9 +271,9 @@ public class outputVariations {
 
     public static void simple(String input, String temp, String output, int threshold, String variation) throws IOException, URISyntaxException,ClassNotFoundException, InterruptedException {
         end = true;
-        long start = System.currentTimeMillis();
+
         Configuration conf = new Configuration();
-        Job job1 = Job.getInstance(conf, "Test");
+        Job job1 = Job.getInstance(conf, "Single Iteration KMedoid");
 
         job1.setJarByClass(outputVariations.class);
         job1.setMapperClass(Map.class);
@@ -286,9 +291,7 @@ public class outputVariations {
         FileInputFormat.addInputPath(job1, new Path(input));
         FileOutputFormat.setOutputPath(job1, new Path(output));
         job1.waitForCompletion(true);
-        long end = System.currentTimeMillis();
-        long timeTaken = end - start;
-        System.out.println("Time Taken: " + timeTaken);
+
 
     }
 
@@ -303,7 +306,6 @@ public class outputVariations {
             simple(startInput, currentTemp, currentOutput, threshold, variation);
 
             if (end){
-                System.out.println("Threshold Met");
                 break;
             }
 
@@ -311,26 +313,4 @@ public class outputVariations {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-
-        String input = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/src/main/python/dataset.csv";
-//        String input = "/Users/mikaelamilch/Library/CloudStorage/OneDrive-WorcesterPolytechnicInstitute(wpi.edu)/2023-2024/CS 585/CS585-Assignment2/src/main/python/datasetTest.csv";
-//        String output = "file:///C:/Users/nickl/OneDrive/Desktop/WPI Graduate/CS585 Big Data Management/Project2/output/optimization";
-//        String output = "/Users/mikaelamilch/Desktop/output";
-
-        String output = "file:///C:/Users/nickl/OneDrive/Desktop/output/variations";
-
-        String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/kmeans.csv";
-
-        String variation1 = "Only Cluster Points";
-        String variation2 = "Final Clustered Points";
-
-        long start = System.currentTimeMillis();
-//        looping(100, input, temp, output, 500, variation1);
-        looping(100, input, temp, output, 500, variation2);
-
-        long end = System.currentTimeMillis();
-        long timeTaken = end - start;
-        System.out.println("Time Taken: " + timeTaken);
-    }
 }

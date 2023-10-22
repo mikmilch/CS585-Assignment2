@@ -69,28 +69,102 @@ public class BYOD {
         String input = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/Mall_Customers.csv";
         String temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/BYOD_kmeans_dataset.csv";
 
-        String singleOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/single";
-        String basicOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/basic";
-        String advancedOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/advanced";
-        String optimizationOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/optimization";
-        String variationOutput1 = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/variation/1";
-        String variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/variation/2";
+        String singleOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k5/single";
+        String basicOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k5/basic";
+        String advancedOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k5/advanced";
+        String optimizationOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k5/optimization";
+        String variationOutput1 = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k5/variation/1";
+        String variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k5/variation/2";
 
 
         System.out.println("BYOD, where X = Income and Y = Spending Score");
+
         single(input, temp, singleOutput);
 
-        basic(10, input, temp, basicOutput);
+        basic(4, input, temp, basicOutput + "/4");
+        basic(10, input, temp, basicOutput + "/10");
+        basic(100, input, temp, basicOutput + "/100");
 
-        advanced(10, input, temp, advancedOutput, 5);
+        advanced(10, input, temp, advancedOutput + "/10", 2);
+        advanced(100, input, temp, advancedOutput + "/100/2", 2);
+        advanced(100, input, temp, advancedOutput + "/100/20", 20);
 
-        optimization(10, input, temp, optimizationOutput, 5);
+        optimization(10, input, temp, optimizationOutput + "/10", 2);
+        optimization(100, input, temp, optimizationOutput + "/100/2", 2);
+        optimization(100, input, temp, optimizationOutput + "/100/20", 20);
+
 
         String variation1 = "Only Cluster Points";
         String variation2 = "Final Clustered Points";
 
-        outputVariation(10, input, temp, variationOutput1, 5, variation1);
-        outputVariation(10, input, temp, variationOutput2, 5, variation2);
+        outputVariation(10, input, temp, variationOutput1, 2, variation1);
+        outputVariation(10, input, temp, variationOutput2, 2, variation2);
+
+        System.out.println("\n");
+
+        input = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/Mall_Customers.csv";
+        temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/BYOD_kmeans10.csv";
+
+        singleOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k10/single";
+        basicOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k10/basic";
+        advancedOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k10/advanced";
+        optimizationOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k10/optimization";
+        variationOutput1 = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k10/variation/1";
+        variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k10/variation/2";
+
+
+        System.out.println("Running with k = 10 Initial Centroids");
+
+        single(input, temp, singleOutput);
+
+        basic(4, input, temp, basicOutput + "/4");
+        basic(10, input, temp, basicOutput + "/10");
+        basic(100, input, temp, basicOutput + "/100");
+
+        advanced(10, input, temp, advancedOutput + "/10", 2);
+        advanced(100, input, temp, advancedOutput + "/100/2", 2);
+        advanced(100, input, temp, advancedOutput + "/100/20", 20);
+
+        optimization(10, input, temp, optimizationOutput + "/10", 2);
+        optimization(100, input, temp, optimizationOutput + "/100/2", 2);
+        optimization(100, input, temp, optimizationOutput + "/100/20", 20);
+
+
+        outputVariation(10, input, temp, variationOutput1, 2, variation1);
+        outputVariation(10, input, temp, variationOutput2, 2, variation2);
+
+        System.out.println("\n");
+
+        input = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/Mall_Customers.csv";
+        temp = "file:///C:/Users/nickl/OneDrive/Desktop/Testing/BYOD_kmeans100.csv";
+
+        singleOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k100/single";
+        basicOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k100/basic";
+        advancedOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k100/advanced";
+        optimizationOutput = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k100/optimization";
+        variationOutput1 = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k100/variation/1";
+        variationOutput2 = "file:///C:/Users/nickl/OneDrive/Desktop/output/BYOD/k100/variation/2";
+
+
+        System.out.println("Running with k = 100 Initial Centroids");
+
+        single(input, temp, singleOutput);
+
+        basic(4, input, temp, basicOutput + "/4");
+        basic(10, input, temp, basicOutput + "/10");
+        basic(100, input, temp, basicOutput + "/100");
+
+        advanced(10, input, temp, advancedOutput + "/10", 2);
+        advanced(100, input, temp, advancedOutput + "/100/2", 2);
+        advanced(100, input, temp, advancedOutput + "/100/20", 20);
+
+        optimization(10, input, temp, optimizationOutput + "/10", 2);
+        optimization(100, input, temp, optimizationOutput + "/100/2", 2);
+        optimization(100, input, temp, optimizationOutput + "/100/20", 20);
+
+
+        outputVariation(10, input, temp, variationOutput1, 2, variation1);
+        outputVariation(10, input, temp, variationOutput2, 2, variation2);
 
     }
 }
