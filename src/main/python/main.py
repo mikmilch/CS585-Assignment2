@@ -95,9 +95,9 @@ if __name__ == '__main__':
     # x_list = []
     # y_list = []
     # dups = []
-    # kmeans(5)
-    # kmeans(10)
-    # kmeans(100)
+    kmeans(5)
+    kmeans(10)
+    kmeans(100)
     kmedoids("dataset.csv", 5)
     medoidsList = []
     xlist = []
