@@ -32,10 +32,10 @@ goodFriends = DISTINCT goodFriends;
 badFriends = JOIN friends BY $0 LEFT OUTER, goodFriends BY $0;
 badFriends = FILTER badFriends BY $2 IS NULL;
 badFriends = FOREACH badFriends GENERATE $0, $1;
+
+-- ID of Person who nevered accessed, ID of second user
 badFriends = ORDER badFriends BY $0;
 
---
---
 -- FaceInPage
 person = FOREACH FaceInPage GENERATE ID, Name;
 
